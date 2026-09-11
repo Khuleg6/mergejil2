@@ -1,0 +1,10 @@
+{
+  "name": "@intern-4a/workspace-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "executors": "./executors.json",
+  "dependencies": {
+    "enquirer": "^2.4.1"
+  }
+}

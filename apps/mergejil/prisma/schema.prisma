@@ -1,0 +1,118 @@
+// Prisma schema for the mergejil app, targeting Neon PostgreSQL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String?  @map("password_hash")
+  fullName      String?  @map("full_name")
+  avatarUrl     String?  @map("avatar_url")
+  isDemo        Boolean  @default(false) @map("is_demo")
+  emailVerified Boolean  @default(false) @map("email_verified")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  oauthAccounts       OAuthAccount[]
+  sessions            Session[]
+  passwordResetTokens PasswordResetToken[]
+  assessmentSessions  AssessmentSession[]
+
+  @@map("users")
+}
+
+model OAuthAccount {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  provider       String
+  providerUserId String   @map("provider_user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@map("oauth_accounts")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+model AssessmentModule {
+  id          String @id @default(uuid())
+  code        String @unique // 'mbti', 'iq', 'skills'
+  name        String
+  durationMin Int?   @map("duration_min")
+  orderIndex  Int?   @map("order_index")
+
+  moduleResults ModuleResult[]
+
+  @@map("assessment_modules")
+}
+
+model AssessmentSession {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  status      String    @default("in_progress") // in_progress / completed
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleResults         ModuleResult[]
+  careerRecommendations CareerRecommendation[]
+
+  @@map("assessment_sessions")
+}
+
+model ModuleResult {
+  id            String   @id @default(uuid())
+  sessionId     String   @map("session_id")
+  moduleId      String   @map("module_id")
+  resultSummary String?  @map("result_summary") // жишээ нь 'INTJ', IQ score
+  resultDetail  Json?    @map("result_detail") // дэлгэрэнгүй оноо/задаргаа
+  completedAt   DateTime @default(now()) @map("completed_at")
+
+  session AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  module  AssessmentModule  @relation(fields: [moduleId], references: [id])
+
+  @@map("module_results")
+}
+
+model CareerRecommendation {
+  id          String   @id @default(uuid())
+  sessionId   String   @map("session_id")
+  careerTitle String   @map("career_title")
+  matchScore  Float?   @map("match_score")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  session AssessmentSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("career_recommendations")
+}

@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+enum AssignmentStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum AssignmentPhase {
+  PREDICT
+  CONFIRM
+  APPLY
+}
+
+model User {
+  id        String    @id @default(cuid())
+  role      Role
+  name      String
+  createdAt DateTime  @default(now())
+  teacher   Teacher?
+  student   Student?
+  sessions  Session[]
+}
+
+model Teacher {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  email        String  @unique
+  passwordHash String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classes      Class[]
+}
+
+model Student {
+  id           String             @id @default(cuid())
+  userId       String             @unique
+  phoneNumber  String             @unique
+  readingLevel Int                @default(1)
+  streakCount  Int                @default(0)
+  avatarId     String?
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatar       Avatar?            @relation(fields: [avatarId], references: [id], onDelete: SetNull)
+  classes      ClassStudent[]
+  responses    WordResponse[]
+  attempts     PracticeAttempt[]
+  unlocks      AvatarUnlock[]
+  streaks      StreakRecord[]
+}
+
+model Class {
+  id        String            @id @default(cuid())
+  teacherId String
+  name      String
+  createdAt DateTime          @default(now())
+  teacher   Teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  students  ClassStudent[]
+  materials ReadingMaterial[]
+  assignments Assignment[]
+
+  @@index([teacherId])
+}
+
+model ClassStudent {
+  classId  String
+  studentId String
+  joinedAt DateTime @default(now())
+  class    Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student  Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([classId, studentId])
+  @@index([studentId])
+}
+
+model ReadingMaterial {
+  id          String       @id @default(cuid())
+  classId     String
+  title       String
+  bodyText    String
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  vocabWords  VocabWord[]
+  assignments Assignment[]
+
+  @@index([classId])
+}
+
+model VocabWord {
+  id         String           @id @default(cuid())
+  materialId String
+  word       String
+  position   Int
+  pictureUrl String?
+  material   ReadingMaterial  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  assignments AssignmentVocab[]
+  responses  WordResponse[]
+
+  @@unique([materialId, position])
+  @@index([materialId, word])
+}
+
+model Assignment {
+  id             String           @id @default(cuid())
+  classId        String
+  materialId     String
+  phase1Unlocked Boolean          @default(false)
+  phase2Unlocked Boolean          @default(false)
+  phase3Unlocked Boolean          @default(false)
+  dueAt          DateTime?
+  status         AssignmentStatus @default(DRAFT)
+  class          Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  material       ReadingMaterial  @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  vocabulary     AssignmentVocab[]
+  responses      WordResponse[]
+
+  @@index([classId, status])
+  @@index([materialId])
+}
+
+model AssignmentVocab {
+  assignmentId String
+  vocabWordId  String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  vocabWord    VocabWord  @relation(fields: [vocabWordId], references: [id], onDelete: Cascade)
+
+  @@id([assignmentId, vocabWordId])
+  @@index([vocabWordId])
+}
+
+model WordResponse {
+  id           String          @id @default(cuid())
+  assignmentId String
+  studentId    String
+  vocabWordId  String
+  phase        AssignmentPhase
+  text         String
+  grade        Int?
+  feedback     String?
+  submittedAt  DateTime        @default(now())
+  assignment   Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  vocabWord    VocabWord       @relation(fields: [vocabWordId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId, vocabWordId, phase])
+  @@index([studentId, submittedAt])
+}
+
+model ExtraPracticeItem {
+  id                    String            @id @default(cuid())
+  level                 Int
+  word                  String
+  pictureUrl            String
+  distractorPictureUrls String[]
+  attempts              PracticeAttempt[]
+
+  @@index([level])
+}
+
+model PracticeAttempt {
+  id         String            @id @default(cuid())
+  itemId     String
+  studentId  String
+  correct    Boolean
+  attemptedAt DateTime         @default(now())
+  item       ExtraPracticeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  student    Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, attemptedAt])
+}
+
+model Avatar {
+  id       String         @id @default(cuid())
+  name     String         @unique
+  imageUrl String
+  students Student[]
+  unlocks  AvatarUnlock[]
+}
+
+model AvatarUnlock {
+  studentId String
+  avatarId  String
+  unlockedAt DateTime @default(now())
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  avatar    Avatar  @relation(fields: [avatarId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, avatarId])
+}
+
+model StreakRecord {
+  id        String   @id @default(cuid())
+  studentId String
+  activityDate DateTime
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, activityDate])
+  @@index([studentId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}

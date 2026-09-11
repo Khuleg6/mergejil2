@@ -1,0 +1,9 @@
+{
+  "executors": {
+    "get-secrets": {
+      "implementation": "./src/executors/get-secrets/executor",
+      "schema": "./src/executors/get-secrets/schema.json",
+      "description": "Fetch secret groups from the intern secrets-manager-service into a local env file"
+    }
+  }
+}

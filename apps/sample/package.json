@@ -1,0 +1,22 @@
+{
+  "name": "@intern-4a/sample",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "next": "~16.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "nx": {
+    "targets": {
+      "get-secrets": {
+        "executor": "@intern-4a/workspace-plugin:get-secrets",
+        "options": {
+          "path": "./apps/sample/",
+          "filename": ".env",
+          "secrets": ["sample"]
+        }
+      }
+    }
+  }
+}

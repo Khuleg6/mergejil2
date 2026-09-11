@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "version": 2,
+  "title": "Get secrets",
+  "description": "Fetch secret groups from the secrets-manager-service into a local env file.",
+  "type": "object",
+  "properties": {
+    "secrets": {
+      "description": "Secret group name, or a list of groups merged left-to-right.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
+    },
+    "path": {
+      "type": "string",
+      "description": "Directory the env file is written to.",
+      "default": "."
+    },
+    "filename": {
+      "type": "string",
+      "description": "Output filename. Use .env for Next.js apps, .dev.vars for Workers.",
+      "default": ".env"
+    },
+    "serviceUrl": {
+      "type": "string",
+      "description": "Override the configured secrets-manager-service URL."
+    }
+  },
+  "required": ["secrets"]
+}

@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/documentation"
+    },
+    {
+      "path": "./apps/sample"
+    },
+    {
+      "path": "./apps/sample-e2e"
+    },
+    {
+      "path": "./apps/mergejil-e2e"
+    },
+    {
+      "path": "./apps/mergejil"
+    },
+    {
+      "path": "./apps/studyjam-e2e"
+    },
+    {
+      "path": "./apps/studyjam"
+    },
+    {
+      "path": "./apps/talent"
+    }
+  ]
+}

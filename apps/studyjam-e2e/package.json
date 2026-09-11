@@ -1,0 +1,10 @@
+{
+  "name": "@intern-4a/studyjam-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@intern-4a/studyjam"
+    ]
+  }
+}

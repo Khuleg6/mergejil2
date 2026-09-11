@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --page: #f8fafc;
+  --ink: #172033;
+  --primary: #4f6fdc;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+
+*, ::before, ::after { box-sizing: border-box; }
+button, input, textarea { font: inherit; }
+button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
+
+button, a {
+  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease,
+    box-shadow 200ms ease, opacity 200ms ease, transform 200ms ease;
+}
+
+button:not(:disabled):active, a:active { transform: scale(0.98); }
+button:disabled { cursor: not-allowed; }
+
+:focus-visible {
+  outline: 3px solid rgba(79, 111, 220, 0.34);
+  outline-offset: 3px;
+}
+
+input, textarea {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+input:focus, textarea:focus {
+  box-shadow: 0 0 0 4px rgba(79, 111, 220, 0.11);
+}
+
+.app-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(224, 231, 255, 0.55), transparent 28rem),
+    radial-gradient(circle at 100% 10%, rgba(209, 250, 229, 0.38), transparent 25rem),
+    var(--page);
+}
+
+.surface {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 35px -24px rgba(30, 41, 59, 0.45);
+}
+
+.interactive-card:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 16px 34px -25px rgba(79, 70, 229, 0.5);
+  transform: translateY(-2px);
+}
+
+.enter { animation: enter 300ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.enter-delay { animation: enter 320ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.list-enter { animation: enter 240ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.notice-enter { animation: notice 220ms ease-out both; }
+.soft-float { animation: soft-float 9s ease-in-out infinite alternate; }
+.soft-float-delayed { animation: soft-float 10s 1.5s ease-in-out infinite alternate-reverse; }
+
+@keyframes enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes notice {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes soft-float {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(8px, 7px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
