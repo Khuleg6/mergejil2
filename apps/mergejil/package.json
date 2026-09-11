@@ -14,5 +14,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.2"
+  },
+  "scripts": {
+    "vercel-build": "prisma generate --schema=prisma/schema.prisma && next build"
   }
 }

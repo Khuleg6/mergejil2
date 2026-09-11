@@ -4,6 +4,8 @@ import { requireUser } from '@/lib/auth/requireUser';
 import { isMbtiType } from '@/lib/mbti';
 import { MODULE_CODES, MODULE_META, type ModuleCode } from '@/lib/careerProfile';
 
+type CompletedModuleResult = { module: { code: string } };
+
 const isModuleCode = (value: string): value is ModuleCode =>
   (MODULE_CODES as readonly string[]).includes(value);
 
@@ -88,7 +90,9 @@ export async function POST(
     where: { sessionId: session.id, module: { code: { in: [...MODULE_CODES] } } },
     select: { module: { select: { code: true } } },
   });
-  const done = new Set(completedCodes.map((row) => row.module.code));
+  const done = new Set(
+    completedCodes.map((row: CompletedModuleResult) => row.module.code),
+  );
   if (MODULE_CODES.every((item) => done.has(item))) {
     await db.assessmentSession.update({
       where: { id: session.id },
